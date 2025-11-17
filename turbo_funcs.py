@@ -374,64 +374,69 @@ def calculate_turbofan_engine_performance(
     TSFC = get_TSFC(fuel_to_mass_ratio, all_station_values, total_thrust)
 
     # --- Task B: HPT Target Calculation ---
-    hpt_targets = calculate_hpt_design_targets(all_station_values, c_pa, c_pp)
+    hpt_targets = calculate_hpt_design_targets(all_station_values, c_pa, c_pp, gamma_c, turb_eff)
 
     # 14. Return the dictionary and final_thrust
     return all_station_values, thrust_values, TSFC, hpt_targets
 
 
-def calculate_hpt_design_targets(all_station_values, c_pa, c_pp):
+# chwck!!
+def calculate_hpt_design_targets(all_station_values, c_pa, c_pp, gamma_c, hpt_turb_eff):
     """
-    Calculates the key design targets for the High-Pressure Turbine (HPT)
-    based on the completed engine cycle analysis (Task A).
-
-    The HPT's primary job is to provide just enough power to drive
-    the High-Pressure Compressor (HPC).
+    Calculates the REASONABLE design targets for the High-Pressure Turbine (HPT)
+    for Task B, based on the Task A cycle.
+    
+    This function IGNORES the T_05 and P_05 from the 1-turbine Task A cycle.
+    Instead, it calculates the *correct* HPT-only exit conditions (T_05_hpt, P_05_hpt)
+    assuming the HPT *only* drives the HPC.
     """
     
-    # Extract necessary values from the cycle analysis
-    T_02 = all_station_values['T_02']
-    T_03 = all_station_values['T_03']
-    T_04 = all_station_values['T_04']
-    P_04 = all_station_values['P_04']
-    T_05 = all_station_values['T_05']
-    P_05 = all_station_values['P_05']
+    # Extract necessary INLET values from the cycle analysis
+    T_02 = all_station_values['T_02'] # HPC Inlet Temp
+    T_03 = all_station_values['T_03'] # HPC Exit Temp
+    T_04 = all_station_values['T_04'] # HPT Inlet Temp
+    P_04 = all_station_values['P_04'] # HPT Inlet Pressure
     mass_flow_core = all_station_values['mass_flow_core']
 
     # 1. Power Target (from HPC)
-    # Power consumed by the HPC (W)
-    power_hpc_W = mass_flow_core * c_pa * (T_03 - T_02)
+    # Specific work *required* by HPC (J/kg)
+    specific_work_hpc = c_pa * (T_03 - T_02)
+    # Total power *required* by HPC (W)
+    power_hpc_W = mass_flow_core * specific_work_hpc
     
     # 2. Specific Enthalpy Drop Target (per kg of turbine gas)
-    # Specific work required from HPT must equal specific work into HPC
-    # w_hpt = w_hpc
-    # Note: w_hpc = c_pa * (T_03 - T_02)
-    # The actual enthalpy drop in the turbine is delta_h_hpt = c_pp * (T_04 - T_05)
-    # The power balance function already ensures:
-    # mass_flow_core * c_pp * (T_04 - T_05) = mass_flow_core * c_pa * (T_03 - T_02)
-    
-    delta_h_hpt_j_kg = c_pp * (T_04 - T_05)
+    # The specific work the HPT *must produce* is equal to
+    # the specific work the HPC *consumes*.
+    delta_h_hpt_j_kg = specific_work_hpc
     
     # 3. Mass Flow Target
     hpt_mass_flow_kg_s = mass_flow_core
 
-    # 4. Inlet/Outlet Conditions (from cycle)
-    hpt_inlet_temp_K = T_04
-    hpt_inlet_pressure_Pa = P_04
-    hpt_outlet_temp_K = T_05
-    hpt_outlet_pressure_Pa = P_05
+    # 4. Calculate REALISTIC HPT Outlet Conditions (for Task B)
+    
+    # Temp drop in HPT to produce this work
+    delta_T_hpt_real = delta_h_hpt_j_kg / c_pp
+    
+    # HPT outlet temperature
+    hpt_outlet_temp_K = T_04 - delta_T_hpt_real
+    
+    # HPT isentropic exit temperature
+    T_05s_hpt = T_04 - (delta_T_hpt_real / hpt_turb_eff)
+    
+    # HPT outlet pressure
+    hpt_outlet_pressure_Pa = P_04 * (T_05s_hpt / T_04) ** (gamma_c / (gamma_c - 1))
     
     # 5. Ratios
-    hpt_expansion_ratio = P_04 / P_05
-    hpt_temperature_ratio = T_04 / T_05
+    hpt_expansion_ratio = P_04 / hpt_outlet_pressure_Pa
+    hpt_temperature_ratio = T_04 / hpt_outlet_temp_K
 
     # Compile targets into a dictionary
     hpt_targets = {
         'power_target_W': power_hpc_W,
         'specific_work_target_j_kg': delta_h_hpt_j_kg,
         'mass_flow_kg_s': hpt_mass_flow_kg_s,
-        'inlet_total_temp_K': hpt_inlet_temp_K,
-        'inlet_total_pressure_Pa': hpt_inlet_pressure_Pa,
+        'inlet_total_temp_K': T_04,
+        'inlet_total_pressure_Pa': P_04,
         'outlet_total_temp_K': hpt_outlet_temp_K,
         'outlet_total_pressure_Pa': hpt_outlet_pressure_Pa,
         'expansion_pressure_ratio': hpt_expansion_ratio,
