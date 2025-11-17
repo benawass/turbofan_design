@@ -1,0 +1,79 @@
+                --- THRUST REQUIREMENTS ---
+============================================================
+        Required thrust per engine:    46,247.14 N
+
+            --- TURBOFAN PERFORMANCE REPORT ---
+************************************************************
+
+               Ambient Conditions (Station 0)
+------------------------------------------------------------
+        Ambient Pressure (P_atm):      22,699.94 Pa
+        Ambient Temperature (T_atm):   216.77 K
+        Ambient Density (rho_atm):     0.3648 kg/m³
+        Speed of Sound (a_atm):        295.15 m/s
+
+                     Mass Flow & Areas
+------------------------------------------------------------
+        Total Mass Flow:               583.85 kg/s
+        Core Mass Flow:                53.08 kg/s
+        Bypass Mass Flow:              530.77 kg/s
+        Bypass Nozzle Area:            4.1374 m²
+
+                   Station 1 (Fan Inlet)
+============================================================
+        Total Pressure (P_01):         36,085.84 Pa
+        Total Temperature (T_01):      248.10 K
+        Isentropic Temp (T_01s):       247.47 K
+
+             Station 2 (Fan Exit / Core Inlet)
+============================================================
+        Total Pressure (P_02):         55,572.19 Pa
+        Total Temperature (T_02):      283.12 K
+        Isentropic Temp (T_02s):       280.67 K
+
+              Station 3 (Core Compressor Exit)
+============================================================
+        Total Pressure (P_03):         1,805,084.90 Pa
+        Total Temperature (T_03):      813.07 K
+        Isentropic Temp (T_03s):       765.37 K
+
+         Station 4 (Combustor Exit / Turbine Inlet)
+============================================================
+        Total Pressure (P_04):         1,714,830.65 Pa
+        Total Temperature (T_04):      1,551.80 K
+
+                  Station 5 (Turbine Exit)
+============================================================
+        Total Pressure (P_05):         50,838.68 Pa
+        Total Temperature (T_05):      711.44 K
+
+                Station 6 (Core Nozzle Exit)
+============================================================
+        Static Pressure (P_6):         26,522.47 Pa
+        Static Temperature (T_6):      610.68 K
+        Static Density (rho_6):        0.1591 kg/m³
+        Exit Velocity (u_6):           470.82 m/s
+
+                Station 7 (Fan Nozzle Exit)
+============================================================
+        Static Pressure (P_7):         28,290.33 Pa
+        Static Temperature (T_7):      235.94 K
+        Static Density (rho_7):        0.4155 kg/m³
+        Exit Velocity (u_7):           308.74 m/s
+
+                       Gas Properties
+------------------------------------------------------------
+        R (Air):                       288.57 J/(kg·K)
+        R (Combustion):                272.93 J/(kg·K)
+
+************************************************************
+
+               --- FINAL CALCULATED THRUST ---
+============================================================
+        Total Thrust Per Engine:       73,196.44 N
+        Bypass Thrust Per Engine:      53,839.05 N
+        Core Thrust Per Engine:        19,357.39 N
+
+                --- FINAL CALCULATED TSFC ---
+============================================================
+        Final Calculated TSFC:         14.84 kg/MN.s
