@@ -77,3 +77,28 @@
                 --- FINAL CALCULATED TSFC ---
 ============================================================
         Final Calculated TSFC:         14.84 kg/MN.s
+
+             --- TASK B: HPT DESIGN TARGETS ---
+************************************************************
+
+                   Primary Design Targets
+------------------------------------------------------------
+        Power Target (from HPC):       28.41 MW (28,409.32 kW)
+        Specific Work Target:          924.39 kJ/kg
+        Mass Flow Target:              53.08 kg/s
+
+              HPT Inlet Conditions (Station 4)
+------------------------------------------------------------
+        Total Temperature (T_04):      1,551.80 K
+        Total Pressure (P_04):         1,714,830.65 Pa
+
+             HPT Outlet Conditions (Station 5)
+------------------------------------------------------------
+        Total Temperature (T_05):      711.44 K
+        Total Pressure (P_05):         50,838.68 Pa
+
+                     Key Design Ratios
+------------------------------------------------------------
+        Expansion Ratio (P_04/P_05):   33.73
+        Temperature Ratio (T_04/T_05): 2.18
+************************************************************

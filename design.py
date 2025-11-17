@@ -61,7 +61,7 @@ print_header("--- Thrust Requirements ---".upper())
 print(f"\t{'Required thrust per engine:':<30} {required_thrust:,.2f} N")
 
 # Engine Performance Calcs
-all_design_results, thrust_vals, final_TSFC = calculate_turbofan_engine_performance(
+all_design_results, thrust_vals, final_TSFC, hpt_targets = calculate_turbofan_engine_performance(
     # flight conditions
     altitude_m,
     mach_cruise,
@@ -109,3 +109,5 @@ print(f"\t{'Core Thrust Per Engine:':<30} {thrust_vals['core_thrust']:,.2f} N")
 
 print_header(" --- Final Calculated TSFC ---".upper())
 print(f"\t{'Final Calculated TSFC:':<30} {final_TSFC*1e6:,.2f} kg/MN.s")
+
+pretty_print_hpt_targets(hpt_targets)

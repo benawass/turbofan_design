@@ -211,6 +211,7 @@ def get_TSFC(f, all_station_values, thrust):
   TSFC =(f * all_station_values['mass_flow_core'])/thrust
   return TSFC
 
+
 def calculate_mass_flows(all_station_values, overall_bypass_ratio, fan_inlet_diameter, mach_cruise):
     # get values
     fan_inlet_area = np.pi * (fan_inlet_diameter/2)**2
@@ -372,8 +373,73 @@ def calculate_turbofan_engine_performance(
     total_thrust = thrust_values['total_thrust']
     TSFC = get_TSFC(fuel_to_mass_ratio, all_station_values, total_thrust)
 
+    # --- Task B: HPT Target Calculation ---
+    hpt_targets = calculate_hpt_design_targets(all_station_values, c_pa, c_pp)
+
     # 14. Return the dictionary and final_thrust
-    return all_station_values, thrust_values, TSFC
+    return all_station_values, thrust_values, TSFC, hpt_targets
+
+
+def calculate_hpt_design_targets(all_station_values, c_pa, c_pp):
+    """
+    Calculates the key design targets for the High-Pressure Turbine (HPT)
+    based on the completed engine cycle analysis (Task A).
+
+    The HPT's primary job is to provide just enough power to drive
+    the High-Pressure Compressor (HPC).
+    """
+    
+    # Extract necessary values from the cycle analysis
+    T_02 = all_station_values['T_02']
+    T_03 = all_station_values['T_03']
+    T_04 = all_station_values['T_04']
+    P_04 = all_station_values['P_04']
+    T_05 = all_station_values['T_05']
+    P_05 = all_station_values['P_05']
+    mass_flow_core = all_station_values['mass_flow_core']
+
+    # 1. Power Target (from HPC)
+    # Power consumed by the HPC (W)
+    power_hpc_W = mass_flow_core * c_pa * (T_03 - T_02)
+    
+    # 2. Specific Enthalpy Drop Target (per kg of turbine gas)
+    # Specific work required from HPT must equal specific work into HPC
+    # w_hpt = w_hpc
+    # Note: w_hpc = c_pa * (T_03 - T_02)
+    # The actual enthalpy drop in the turbine is delta_h_hpt = c_pp * (T_04 - T_05)
+    # The power balance function already ensures:
+    # mass_flow_core * c_pp * (T_04 - T_05) = mass_flow_core * c_pa * (T_03 - T_02)
+    
+    delta_h_hpt_j_kg = c_pp * (T_04 - T_05)
+    
+    # 3. Mass Flow Target
+    hpt_mass_flow_kg_s = mass_flow_core
+
+    # 4. Inlet/Outlet Conditions (from cycle)
+    hpt_inlet_temp_K = T_04
+    hpt_inlet_pressure_Pa = P_04
+    hpt_outlet_temp_K = T_05
+    hpt_outlet_pressure_Pa = P_05
+    
+    # 5. Ratios
+    hpt_expansion_ratio = P_04 / P_05
+    hpt_temperature_ratio = T_04 / T_05
+
+    # Compile targets into a dictionary
+    hpt_targets = {
+        'power_target_W': power_hpc_W,
+        'specific_work_target_j_kg': delta_h_hpt_j_kg,
+        'mass_flow_kg_s': hpt_mass_flow_kg_s,
+        'inlet_total_temp_K': hpt_inlet_temp_K,
+        'inlet_total_pressure_Pa': hpt_inlet_pressure_Pa,
+        'outlet_total_temp_K': hpt_outlet_temp_K,
+        'outlet_total_pressure_Pa': hpt_outlet_pressure_Pa,
+        'expansion_pressure_ratio': hpt_expansion_ratio,
+        'temperature_ratio': hpt_temperature_ratio,
+    }
+    
+    return hpt_targets
+
 
 def print_header(title, char="="):
     """Helper function to print a formatted header."""
@@ -479,3 +545,35 @@ def pretty_print_engine_stats(stats):
         print(f"\t{'R (Combustion):':<30} {stats.get('R_c', 0.0):,.2f} J/(kg·K)")
 
     print("\n" + "*" * 60)
+
+
+def pretty_print_hpt_targets(hpt_targets):
+    """Prints a formatted report of HPT design targets (Task B)."""
+    
+    print_header("--- TASK B: HPT DESIGN TARGETS ---", char="*")
+
+    # --- Primary Targets ---
+    print_header("Primary Design Targets", char="-")
+    power_kW = hpt_targets.get('power_target_W', 0.0) / 1000
+    power_MW = power_kW / 1000
+    spec_work_kJ = hpt_targets.get('specific_work_target_j_kg', 0.0) / 1000
+    
+    print(f"\t{'Power Target (from HPC):':<30} {power_MW:,.2f} MW ({power_kW:,.2f} kW)")
+    print(f"\t{'Specific Work Target:':<30} {spec_work_kJ:,.2f} kJ/kg")
+    print(f"\t{'Mass Flow Target:':<30} {hpt_targets.get('mass_flow_kg_s', 0.0):,.2f} kg/s")
+
+    # --- Inlet Conditions ---
+    print_header("HPT Inlet Conditions (Station 4)", char="-")
+    print(f"\t{'Total Temperature (T_04):':<30} {hpt_targets.get('inlet_total_temp_K', 0.0):,.2f} K")
+    print(f"\t{'Total Pressure (P_04):':<30} {hpt_targets.get('inlet_total_pressure_Pa', 0.0):,.2f} Pa")
+
+    # --- Outlet Conditions ---
+    print_header("HPT Outlet Conditions (Station 5)", char="-")
+    print(f"\t{'Total Temperature (T_05):':<30} {hpt_targets.get('outlet_total_temp_K', 0.0):,.2f} K")
+    print(f"\t{'Total Pressure (P_05):':<30} {hpt_targets.get('outlet_total_pressure_Pa', 0.0):,.2f} Pa")
+
+    # --- Key Design Ratios ---
+    print_header("Key Design Ratios", char="-")
+    print(f"\t{'Expansion Ratio (P_04/P_05):':<30} {hpt_targets.get('expansion_pressure_ratio', 0.0):,.2f}")
+    print(f"\t{'Temperature Ratio (T_04/T_05):':<30} {hpt_targets.get('temperature_ratio', 0.0):,.2f}")
+    print("*" * 60)
